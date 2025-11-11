@@ -51,6 +51,11 @@ async function run() {
       res.send({
         result,
       })
+    });
+
+    app.get('/latest-books',async(req,res)=>{
+      const result=await bookCollection.find().sort({_id:-1}).limit(6).toArray();
+      res.send(result);
     })
 
 

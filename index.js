@@ -27,7 +27,8 @@ async function run() {
     const bookCollection=db.collection('allBooks');
 
    app.get('/allBooks',async(req,res)=>{
-    const result=await bookCollection.find().toArray();
+    const sortOrder=req.query.sort==='asc'? 1 : -1;
+    const result=await bookCollection.find().sort({rating: sortOrder}).toArray();
     console.log(result);
     res.send(result);
      });
@@ -56,8 +57,41 @@ async function run() {
     app.get('/latest-books',async(req,res)=>{
       const result=await bookCollection.find().sort({_id:-1}).limit(6).toArray();
       res.send(result);
-    })
+    });
 
+    app.get('/my-books',async(req,res)=>{
+      const email=req.query.email;
+      const result=await bookCollection.find({userEmail : email}).toArray();
+      res.send(result);
+    });
+
+    app.put('/bookDetails/:id',async(req,res)=>{
+      const {id}=req.params;
+      const data=req.body;
+      const objectId=new ObjectId(id);
+      const filter={_id:objectId}
+      const update={
+        $set:data
+      };
+
+       const result=await bookCollection.updateOne(filter,update)
+
+      res.send({
+        success:true,
+        result,
+      })
+    });
+
+
+    app.delete('/bookDetails/:id',async(req,res)=>{
+      const {id}=req.params;
+      const result=await bookCollection.deleteOne({_id:new ObjectId(id)})
+
+      res.send({
+        success:true,
+        result,
+      })
+    })
 
 
 
